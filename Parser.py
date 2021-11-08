@@ -5,8 +5,6 @@ import numpy as np
 import pandas as pd
 
 """
-Logic --> 
-
 function: getHTMLResults 
     ---------------------
     input: num of desired results
@@ -16,7 +14,7 @@ function: getHTMLResults
         Find each results in page and add to a list
     return List of html results 
 
-function: ParseHTML 
+function: parseHTML 
     ---------------------
     input: List of HTML results 
     output: dataframe of housing data
@@ -31,10 +29,18 @@ function: ParseHTML
                     Add all of these to df 
     return df 
 
-funtion: ParseCard
+funtion: parseDocs
     -----------------------
     input: "li" html contents 
-    output: "div" attrs: "data-testid", class_ = "Card__CardWrapper-x1sjdn-0 gnintI"
+    output: title block
+        "div" attrs: "data-testid":"title-block", class_ = "Card__CardWrapper-x1sjdn-0 gnintI"
+    -----------------------
+
+function: getAttributes
+    -----------------------
+    input: title block 
+    output: wanted attributes:
+        List<str> [price, address, beds, bathrooms, area]
     -----------------------
 """
 
@@ -77,11 +83,20 @@ class Parser:
 
     def getAttributes(div_html: bs4.element.Tag):
         soup = div_html
-        cardPrice = soup.find("span", class_="TitleBlock__StyledSpan-sc-1avkvav-4 gDBFnc").get_text()
-        cardAddress = soup.find("p", attrs={"data-testid":"address"}, class_="TitleBlock__Address-sc-1avkvav-7 knPImU").get_text()
-        cardBedrooms = soup.find("p", attrs={"data-testid":"beds"}, class_="TitleBlock__CardInfoItem-sc-1avkvav-8 jBZmlN").get_text()
-        cardBaths = soup.find("p", attrs={"data-testid":"baths"}, class_="TitleBlock__CardInfoItem-sc-1avkvav-8 jBZmlN").get_text()
-        cardArea = soup.find("p", attrs={"data-testid":"floor-area"}, class_="TitleBlock__CardInfoItem-sc-1avkvav-8 jBZmlN").get_text()
+        cardPrice = soup.find("span",
+                             class_="TitleBlock__StyledSpan-sc-1avkvav-4 gDBFnc").get_text()
+        cardAddress = soup.find("p",
+                             attrs={"data-testid":"address"},
+                             class_="TitleBlock__Address-sc-1avkvav-7 knPImU").get_text()
+        cardBedrooms = soup.find("p",
+                             attrs={"data-testid":"beds"},
+                             class_="TitleBlock__CardInfoItem-sc-1avkvav-8 jBZmlN").get_text()
+        cardBaths = soup.find("p",
+                             attrs={"data-testid":"baths"},
+                             class_="TitleBlock__CardInfoItem-sc-1avkvav-8 jBZmlN").get_text()
+        cardArea = soup.find("p",
+                             attrs={"data-testid":"floor-area"},
+                             class_="TitleBlock__CardInfoItem-sc-1avkvav-8 jBZmlN").get_text()
         cardResults = [cardPrice, cardAddress, cardBedrooms, cardBaths, cardArea]
         return cardResults
 
