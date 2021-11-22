@@ -55,7 +55,6 @@ Input : Physical address
 Output : Geographic locations(latitude,longitude)
 
 
-
 --------------
 """
 
@@ -115,30 +114,21 @@ class Parser:
                              attrs={"data-testid":"floor-area"},
                              class_="TitleBlock__CardInfoItem-sc-1avkvav-8 jBZmlN").get_text()
         cardResults = [cardPrice, cardAddress, cardBedrooms, cardBaths, cardArea]
-        print("---------------Printing the vairable card address----------",cardAddress)
-        print("CARD RESULTS -----",cardResults)
         
         cardCoordinates = Parser.getCoordinates(cardAddress)
         cardResults =[cardPrice, cardAddress, cardBedrooms, cardBaths, cardArea,cardCoordinates]
-        print("-----The updates card  results are -----")
-        print(cardResults)
         return cardResults
   
   
     def getCoordinates(address):
         geolocator =Nominatim(user_agent="my_request")
-        print("The passed address is",address)
-
+        
         location = geolocator.geocode(address)
-        print("The returned latitude is :",location.latitude)
-        print("the longitude is ",location.longitude)
-
         return(location.latitude,location.longitude)
 
 
 def main():
     HTMLList = Parser.getHTMLResults(100);
-    print("showimg results ")
     Parser.parseHTML(HTMLList)
     return 0;
 
