@@ -1,8 +1,12 @@
 import bs4
 from bs4 import BeautifulSoup
-import requests 
+import requests
+from requests.api import get 
 import numpy as np 
 import pandas as pd
+import geopy
+from geopy.geocoders import Nominatim
+
 
 """
 function: getHTMLResults 
@@ -42,6 +46,17 @@ function: getAttributes
     output: wanted attributes:
         List<str> [price, address, beds, bathrooms, area]
     -----------------------
+
+
+function : 
+
+-------------------
+Input : Physical address
+Output : Geographic locations(latitude,longitude)
+
+
+
+--------------
 """
 
 class Parser: 
@@ -63,6 +78,7 @@ class Parser:
                 .find_all("li", class_="SearchPage__Result-gg133s-2 itNYNv")
             results.extend(currResult)
         print(len(results))
+      
         return results
 
     def parseHTML(htmlList: list) -> pd.DataFrame:
@@ -72,6 +88,7 @@ class Parser:
             Parser.getAttributes(cardTitleBlock)
             break
         pass 
+
 
     def parseDoc(li_html: bs4.element.Tag):
         soup = li_html 
@@ -98,13 +115,33 @@ class Parser:
                              attrs={"data-testid":"floor-area"},
                              class_="TitleBlock__CardInfoItem-sc-1avkvav-8 jBZmlN").get_text()
         cardResults = [cardPrice, cardAddress, cardBedrooms, cardBaths, cardArea]
+        print("---------------Printing the vairable card address----------",cardAddress)
+        print("CARD RESULTS -----",cardResults)
+        
+        cardCoordinates = Parser.getCoordinates(cardAddress)
+        cardResults =[cardPrice, cardAddress, cardBedrooms, cardBaths, cardArea,cardCoordinates]
+        print("-----The updates card  results are -----")
+        print(cardResults)
         return cardResults
+  
+  
+    def getCoordinates(address):
+        geolocator =Nominatim(user_agent="my_request")
+        print("The passed address is",address)
+
+        location = geolocator.geocode(address)
+        print("The returned latitude is :",location.latitude)
+        print("the longitude is ",location.longitude)
+
+        return(location.latitude,location.longitude)
 
 
 def main():
     HTMLList = Parser.getHTMLResults(100);
+    print("showimg results ")
     Parser.parseHTML(HTMLList)
     return 0;
+
 
 if __name__ == '__main__':
     main()
