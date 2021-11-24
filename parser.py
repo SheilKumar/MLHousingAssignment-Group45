@@ -3,6 +3,7 @@ from bs4 import BeautifulSoup
 import requests 
 import numpy as np 
 import pandas as pd
+import re
 
 """
 function: getHTMLResults 
@@ -66,12 +67,15 @@ class Parser:
         return results
 
     def parseHTML(htmlList: list) -> pd.DataFrame:
-        df = pd.DataFrame(columns=["Price", "Address", "Bedrooms", "Baths"])
+        df = pd.DataFrame(columns=["Price", "Address", "Bedrooms", "Baths","Area"])
         for li_html in htmlList:
             cardTitleBlock = Parser.parseDoc(li_html)
-            Parser.getAttributes(cardTitleBlock)
-            break
-        pass 
+            cardResults = Parser.getAttributes(cardTitleBlock)
+            #print(cardResults)
+            df = df.append(cardResults)
+            #break
+        #pass
+        return df
 
     def parseDoc(li_html: bs4.element.Tag):
         soup = li_html 
@@ -83,27 +87,45 @@ class Parser:
 
     def getAttributes(div_html: bs4.element.Tag):
         soup = div_html
-        cardPrice = soup.find("span",
-                             class_="TitleBlock__StyledSpan-sc-1avkvav-4 gDBFnc").get_text()
-        cardAddress = soup.find("p",
-                             attrs={"data-testid":"address"},
-                             class_="TitleBlock__Address-sc-1avkvav-7 knPImU").get_text()
-        cardBedrooms = soup.find("p",
-                             attrs={"data-testid":"beds"},
-                             class_="TitleBlock__CardInfoItem-sc-1avkvav-8 jBZmlN").get_text()
-        cardBaths = soup.find("p",
-                             attrs={"data-testid":"baths"},
-                             class_="TitleBlock__CardInfoItem-sc-1avkvav-8 jBZmlN").get_text()
-        cardArea = soup.find("p",
-                             attrs={"data-testid":"floor-area"},
-                             class_="TitleBlock__CardInfoItem-sc-1avkvav-8 jBZmlN").get_text()
-        cardResults = [cardPrice, cardAddress, cardBedrooms, cardBaths, cardArea]
+        
+        cardPrice = soup.find("span",class_="TitleBlock__StyledSpan-sc-1avkvav-4 gDBFnc")
+        if cardPrice != None:
+            cardPrice = cardPrice.get_text()
+            cardPrice = re.sub(u"([^\u0030-\u0039])","",cardPrice)
+        #cardPrice = soup.find("span",class_="TitleBlock__StyledSpan-sc-1avkvav-4 gDBFnc").get_text()
+        
+        cardAddress = soup.find("p",attrs={"data-testid":"address"},class_="TitleBlock__Address-sc-1avkvav-7 knPImU")
+        if cardAddress != None:
+            cardAddress = cardAddress.get_text()
+        #cardAddress = soup.find("p",attrs={"data-testid":"address"},class_="TitleBlock__Address-sc-1avkvav-7 knPImU").get_text()
+        
+        cardBedrooms = soup.find("p",attrs={"data-testid":"beds"},class_="TitleBlock__CardInfoItem-sc-1avkvav-8 jBZmlN")
+        if cardBedrooms != None:
+            cardBedrooms = cardBedrooms.get_text()
+            cardBedrooms = re.sub(u"([^\u0030-\u0039])","",cardBedrooms)
+        #cardBedrooms = soup.find("p",attrs={"data-testid":"beds"},class_="TitleBlock__CardInfoItem-sc-1avkvav-8 jBZmlN").get_text()
+        
+        cardBaths = soup.find("p",attrs={"data-testid":"baths"},class_="TitleBlock__CardInfoItem-sc-1avkvav-8 jBZmlN")
+        if cardBaths != None:
+            cardBaths = cardBaths.get_text()
+            cardBaths = re.sub(u"([^\u0030-\u0039])","",cardBaths)
+        #cardBaths = soup.find("p",attrs={"data-testid":"baths"},class_="TitleBlock__CardInfoItem-sc-1avkvav-8 jBZmlN").get_text()
+        
+        cardArea = soup.find("p",attrs={"data-testid":"floor-area"},class_="TitleBlock__CardInfoItem-sc-1avkvav-8 jBZmlN")
+        if cardArea != None:
+            cardArea = cardArea.get_text()
+            cardArea = re.sub(u"([^\u0030-\u0039])","",cardArea)
+        #cardArea = soup.find("p",attrs={"data-testid":"floor-area"},class_="TitleBlock__CardInfoItem-sc-1avkvav-8 jBZmlN").get_text()
+        
+        cardResults = pd.DataFrame([[cardPrice, cardAddress, cardBedrooms, cardBaths, cardArea]],columns=["Price", "Address", "Bedrooms", "Baths","Area"])
+        #cardResults = [cardPrice, cardAddress, cardBedrooms, cardBaths, cardArea]
         return cardResults
 
-
 def main():
-    HTMLList = Parser.getHTMLResults(100);
-    Parser.parseHTML(HTMLList)
+    HTMLList = Parser.getHTMLResults(1500);
+    df = Parser.parseHTML(HTMLList)
+    print(df)
+    df.to_csv('House.csv',index = False,float_format = 2,header = True)
     return 0;
 
 if __name__ == '__main__':
