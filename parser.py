@@ -46,6 +46,8 @@ function: getAttributes
     output: wanted attributes:
         List<str> [price, address, beds, bathrooms, area]
     -----------------------
+
+    
 """
 
 
@@ -105,8 +107,9 @@ class Parser:
         #cardAddress = soup.find("p",attrs={"data-testid":"address"},class_="TitleBlock__Address-sc-1avkvav-7 knPImU").get_text()
         print(" address",cardAddress)
      
-        cardCoordinates = Parser.getCoordinates(cardAddress)
-        print("coordinates of address",cardCoordinates)
+        (latit,longit)= Parser.getCoordinates(cardAddress)
+    ##  print("coordinates of address",cardCoordinates)
+      
 
         cardBedrooms = soup.find("p",attrs={"data-testid":"beds"},class_="TitleBlock__CardInfoItem-sc-1avkvav-8 jBZmlN")
         if cardBedrooms != None:
@@ -130,7 +133,7 @@ class Parser:
           #  columns=["Price","Address","Bedrooms","Bathrooms","Area","Address coordinates"])
     
   
-        cardResults = pd.DataFrame([[cardPrice, cardAddress, cardBedrooms, cardBaths, cardArea]],columns=["Price", "Address", "Bedrooms", "Baths","Area"])
+        cardResults = pd.DataFrame([[cardPrice, cardAddress,latit,longit, cardBedrooms, cardBaths, cardArea]],columns=["Price", "Address", "Latitude","Longitude","Bedrooms", "Baths","Area"])
         #cardResults = [cardPrice, cardAddress, cardBedrooms, cardBaths, cardArea]
         return cardResults
 
@@ -139,7 +142,7 @@ class Parser:
     def getCoordinates(address):
         
         geolocator =Nominatim(user_agent="my_request",)
-        sleep(1.0)
+        sleep(2.0)
         location = geolocator.geocode(address)
         if location:
             latit=location.latitude
@@ -148,7 +151,7 @@ class Parser:
             list = address.split(",")
             length =len(list)
             addressArea=list[length-2]
-            print("second last array element ",list[length-2])
+            ##print("second last array element ",list[length-2])
             location=geolocator.geocode(addressArea)
             if location:
                 latit=location.latitude
